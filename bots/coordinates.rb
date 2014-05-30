@@ -1,6 +1,8 @@
+require 'rtanque'
+
 class Coordinates < RTanque::Point
   def initialize x, y
-    super
+    super(x.to_f, y.to_f)
   end
 
   def +(coord)
@@ -13,6 +15,10 @@ class Coordinates < RTanque::Point
 
   def *(number)
     Coordinates.new(x * number, y * number)
+  end
+
+  def /(number)
+    Coordinates.new(x/number, y/number)
   end
 
   def self.new_from_polars angle, radius
