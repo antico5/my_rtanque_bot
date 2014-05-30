@@ -4,8 +4,6 @@ class Keyboard < RTanque::Bot::Brain
   NAME = 'Keyboard'
 
   def tick!
-    puts sensors.heading.to_f
-
     command.radar_heading = sensors.radar_heading + (RTanque::Heading::ONE_DEGREE * 30)
 
     if sensors.button_down?(Gosu::KbLeft)
