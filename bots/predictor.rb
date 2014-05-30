@@ -10,16 +10,11 @@ class Predictor
     @bot = bot
   end
 
-  def predict_heading
-    # do for only 1 robot
-    return unless info = @enemies.values.last
-
-    if info.headings.size <= 2
-      yield info.headings.last
-    else
+  def predict_coordinates
+    if (info = @enemies.values.last) and info.coordinates.count > 2
       time = shell_time info.distances.last
-      angle_degrees = NewtonCalc.cuadratic_approximation info.headings[-3..-1].map(&:to_degrees), time
-      yield RTanque::Heading.new_from_degrees angle_degrees
+      prediction = NewtonCalc.cuadratic_approximation [-2,-1,0], info.coordinates[-3..-1], time
+      yield prediction
     end
   end
 
@@ -49,9 +44,5 @@ class Predictor
 
   def fire_power
     5
-  end
-
-  def position
-    sensors.position
   end
 end
