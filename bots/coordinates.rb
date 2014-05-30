@@ -21,6 +21,10 @@ class Coordinates < RTanque::Point
     Coordinates.new(x/number, y/number)
   end
 
+  def angle
+    Math.atan2(x,y)
+  end
+
   def self.new_from_polars angle, radius
     angle -= Math::PI/2
     angle *= -1
