@@ -1,4 +1,5 @@
 require_relative 'predictor'
+require_relative 'maneuverer'
 
 class Armando < RTanque::Bot::Brain
 
@@ -28,8 +29,8 @@ class Armando < RTanque::Bot::Brain
   end
 
   def maniobras_evasivas
-    command.heading = sensors.heading + ONE_DEGREE * 1.5
-    command.speed = 3
+    @maneuverer ||= Maneuverer.new(self)
+    @maneuverer.maneuver @aim_lock
   end
 
   def disparar
