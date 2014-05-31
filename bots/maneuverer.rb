@@ -7,7 +7,7 @@ class Maneuverer
   MAX_ROTATION = RTanque::Heading::ONE_DEGREE * 1.5
   MAX_SPEED = 3
 
-  DIRECTION_CHANGE_INTERVAL = 20
+  DIRECTION_CHANGE_INTERVAL = 40
   DESTINATION_CHANGE_INTERVAL = 120
 
   attr_accessor :bot
@@ -21,10 +21,11 @@ class Maneuverer
   end
 
   def maneuver enemy = nil
-      generate_destination if should_change_destination?
-      zigzag_direction if should_change_direction?
-      command.heading = direction
-      command.speed = MAX_SPEED
+    @enemy = enemy
+    generate_destination if should_change_destination?
+    zigzag_direction if should_change_direction?
+    command.heading = direction
+    command.speed = MAX_SPEED
   end
 
   private
@@ -47,22 +48,20 @@ class Maneuverer
 
   def zigzag_direction
     @cycler ||= [-1,2].cycle
-    @direction_modifier = ((rand) * PI/8) * @cycler.next
+    @direction_modifier = ((rand+0.5) * PI/8) * @cycler.next
   end
 
   def generate_destination
     width = bot.arena.width
     height = bot.arena.height
     @destination = Coordinates.new(rand * width, rand * height)
-    while distance_to_destination < 500 do
+    while distance_to_destination(sensors.position) < 500 do
       @destination = Coordinates.new(rand * width, rand * height)
     end
-    puts "New destination: #{@destination.to_s}"
-    puts distance_to_destination
   end
 
-  def distance_to_destination
-    (@destination - sensors.position).modulus
+  def distance_to_destination pos
+    (@destination - pos).modulus
   end
 
   def should_change_direction?
