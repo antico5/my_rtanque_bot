@@ -10,18 +10,16 @@ class Predictor
     @bot = bot
   end
 
-  def predict_coordinates
-    if (info = @enemies.values.last) and info.coordinates.count > 2
+  def predict_coordinates &b
+    pick_enemy do |info|
       time = shell_time info.distances.last
-      prediction = NewtonCalc.cuadratic_approximation [-2,-1,0], info.coordinates[-3..-1], time
-      yield prediction
+      yield NewtonCalc.cuadratic_approximation [-2,-1,0], info.coordinates[-3..-1], time
     end
   end
 
   def process_info reflection
     info = enemy_info reflection
-    info.process reflection
-    info.last_updated = ticks
+    info.process reflection, ticks
   end
 
   def tick
@@ -44,5 +42,10 @@ class Predictor
 
   def fire_power
     5
+  end
+
+  def pick_enemy &b
+    info = @enemies.values.last #designed for only 1 enemy, so get the last EnemyInfo
+    yield info if info and info.coordinates.count >= 3 # need at least 3 observations to make a cuadratic approx.
   end
 end
