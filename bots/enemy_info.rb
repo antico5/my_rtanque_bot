@@ -12,10 +12,11 @@ class EnemyInfo
     @bot = bot
   end
 
-  def process reflection
+  def process reflection, ticks
     headings << reflection.heading
     distances << reflection.distance
     coordinates << enemy_coordinates(reflection)
+    @last_updated = ticks
   end
 
   def enemy_coordinates reflection
