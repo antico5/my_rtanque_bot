@@ -35,7 +35,7 @@ class Armando < RTanque::Bot::Brain
     @maneuverer.maneuver @aim_lock
   end
 
-  def aim
+  def aim &b
     @predictor.predict_coordinates do |prediction|
       aiming_vector = prediction - sensors.position
       yield Heading.new(aiming_vector.angle)
@@ -61,7 +61,7 @@ class Armando < RTanque::Bot::Brain
     end
   end
 
-  def search_enemies
+  def search_enemies &b
     @aim_lock = nil
     sensors.radar.find {|r| yield r}
   end
