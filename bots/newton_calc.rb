@@ -13,14 +13,4 @@ module NewtonCalc
 
     prediccion = y0 + b1 * (t - t0) + b3 * (t - t0) * (t - t1)
   end
-
-#  def self.linear_approximation array, t
-#    t += 1
-
-#    a1 = array[-2]
-#    a2 = array[-1]
-#    b1 = a2 - a1
-
-#    prediccion = a1 + b1 * t
-#  end
 end
