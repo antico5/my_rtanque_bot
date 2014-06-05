@@ -10,52 +10,59 @@ class Armando < RTanque::Bot::Brain
   NAME = 'Armando'
   ONE_DEGREE = Heading::ONE_DEGREE
 
+  def initialize params
+    super
+    @predictor ||= Predictor.new(self)
+    @maneuverer ||= Maneuverer.new(self)
+  end
+
   def tick!
     tick_predictor
-    buscar_enemigos
-    enemigos do |enemigo|
-      @predictor.process_info enemigo
-      @aim_lock = enemigo
-      command.radar_heading = enemigo.heading
+    move_radar
+    search_enemies do |enemy|
+      @predictor.process_info enemy
+      @aim_lock = enemy
     end
-    disparar
-    maniobras_evasivas
-    clean_variables
+    shoot
+    evade
   end
 
   def tick_predictor
-    @predictor ||= Predictor.new(self)
     @predictor.tick
   end
 
-  def maniobras_evasivas
-    @maneuverer ||= Maneuverer.new(self)
+  def evade
     @maneuverer.maneuver @aim_lock
   end
 
-  def disparar
+  def aim
     @predictor.predict_coordinates do |prediction|
       aiming_vector = prediction - sensors.position
-      desired_heading = Heading.new(aiming_vector.angle)
-      command.turret_heading = desired_heading
-      angle_delta = sensors.turret_heading.delta(desired_heading).abs
+      yield Heading.new(aiming_vector.angle)
+    end
+  end
+
+  def shoot
+    aim do |heading|
+      command.turret_heading = heading
+      angle_delta = sensors.turret_heading.delta(heading).abs
       if angle_delta < 0.05
         command.fire 5
       end
     end
   end
 
-  def buscar_enemigos
-    command.radar_heading = sensors.radar_heading + ONE_DEGREE * 10 unless @aim_lock
-    command.turret_heading = sensors.radar_heading
+  def move_radar
+    if @aim_lock
+      command.radar_heading = @aim_lock.heading
+    else
+      command.radar_heading = sensors.radar_heading + ONE_DEGREE * 10
+      command.turret_heading = sensors.radar_heading
+    end
   end
 
-  def enemigos
+  def search_enemies
+    @aim_lock = nil
     sensors.radar.find {|r| yield r}
   end
-
-  def clean_variables
-    @aim_lock = nil
-  end
-
 end
